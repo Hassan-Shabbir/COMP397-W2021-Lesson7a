@@ -44,6 +44,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundMask);
 
+
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2.0f;
@@ -82,6 +83,7 @@ public class PlayerBehaviour : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
+        hitSound.Play();
         healthBar.TakeDamage(damage);
         if (health < 0)
         {
