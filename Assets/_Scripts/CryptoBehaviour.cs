@@ -8,7 +8,8 @@ public enum CryptoState
 {
     IDLE,
     RUN,
-    JUMP
+    JUMP,
+    KICK
 }
 
 
@@ -22,6 +23,11 @@ public class CryptoBehaviour : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
+    [Header("Attack")]
+    public float distance;
+    public PlayerBehaviour playerBehaviour;
+    public int damageDelay = 30;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -30,28 +36,38 @@ public class CryptoBehaviour : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (HasLOS)
         {
             agent.SetDestination(player.transform.position);
+            playerBehaviour = FindObjectOfType<PlayerBehaviour>();
         }
 
 
-        if(HasLOS && Vector3.Distance(transform.position, player.transform.position) < 2.5)
+        if(HasLOS && Vector3.Distance(transform.position, player.transform.position) < distance)
         {
                 // could be an attack
-            animator.SetInteger("AnimState", (int)CryptoState.IDLE);
+            animator.SetInteger("AnimState", (int)CryptoState.KICK);
             transform.LookAt(transform.position - player.transform.forward);
+
+            if (Time.frameCount % damageDelay == 0)
+            {
+                DoKickDamage();
+            }
 
             if (agent.isOnOffMeshLink)
             {
                 animator.SetInteger("AnimState", (int)CryptoState.JUMP);
             }
         }
-        else
+        else if (HasLOS)
         {
             animator.SetInteger("AnimState", (int)CryptoState.RUN);
+        }
+        else
+        {
+            animator.SetInteger("AnimState", (int)CryptoState.IDLE);
         }
     }
 
@@ -62,6 +78,11 @@ public class CryptoBehaviour : MonoBehaviour
             HasLOS = true;
             player = other.transform.gameObject;
         }
+    }
+
+    private void DoKickDamage()
+    {
+        playerBehaviour.TakeDamage(20);
     }
 
 }
